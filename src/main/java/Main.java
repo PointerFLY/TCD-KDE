@@ -1,63 +1,195 @@
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.enhanced.Personality;
 import org.apache.jena.ontology.*;
+import org.apache.jena.propertytable.graph.GraphCSV;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.reasoner.rulesys.builtins.Print;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.vocabulary.FOAF;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.apache.jena.propertytable.lang.CSV2RDF;
+
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
 
+    private static void download(String url, String file) throws Exception {
+        Path path = Paths.get(file);
+        URI u = URI.create(url);
+        try (InputStream in = u.toURL().openStream()) {
+            Files.copy(in, path);
+        }
+    }
+
     public static void main(String[] args) {
-        rdf();
-        owl();
+        String countyURL = "http://data.geohive.ie/dumps/county/default.ttl";
+        String schoolURL = "http://airo.maynoothuniversity.ie/files/dDATASTORE/education/csv/primary_schools_2013_2014.csv";
+
+        Path countyPath = Paths.get("temp/county.ttl");
+        Path schoolCSVPath = Paths.get("temp/school.csv");
+        Path schoolPath = Paths.get("temp/school.ttl");
+        if(!Files.exists(countyPath)) {
+            try {
+                Files.createDirectories(countyPath.getParent());
+                download(countyURL, countyPath.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (!Files.exists(schoolCSVPath)) {
+            try {
+                Files.createDirectories(schoolCSVPath.getParent());
+                download(schoolURL, schoolCSVPath.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            FileReader in = new FileReader(schoolCSVPath.toFile());
+            for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
+                System.out.println(record);
+//                for (String field : record) {
+//                    System.out.print("\"" + field + "\", ");
+//                }
+//                System.out.println();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        CSV2RDF.init() ;
+//        Model model = ModelFactory.createDefaultModel();
+//        model.read(schoolCSVPath.toString());
+//        try {
+//            model.write(new FileOutputStream(new File(schoolPath.toString())), "TURTLE");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        createOntology();
     }
 
-    static void rdf() {
-        Model model = ModelFactory.createDefaultModel();
-        String ns = "http://www.example.com/example#";
-        Resource john = model.createResource(ns + "John");
-        Resource jane = model.createResource(ns + "Jane");
-        // Create the 'hasBrother' Property declaration
-        Property hasBrother = model.createProperty(ns, "hasBrother");
-        // Associate jane to john through 'hasBrother'
-        jane.addProperty(hasBrother, john);
-        // Create the 'hasSister' Property declaration
-        Property hasSister = model.createProperty(ns, "hasSister");
-        // Associate john and jane through 'hasSister' with a Statement
-        Statement sisterStmt = model.createStatement(john, hasSister, jane);
-        model.add(sisterStmt);
-        model.write(System.out, "RDF/XML");
-    }
+    static void createOntology() {
+        String baseURI = "http://www.cs7is1.com/assignment2/ireland-schools";
+        String ns = baseURI + "#";
 
-    static void owl() {
         OntModel ontModel = ModelFactory.createOntologyModel();
-        String ns = "http://www.example.com/onto1#";
-        String baseURI = "http://www.example.com/onto1";
-        Ontology onto = ontModel.createOntology(baseURI);
-        // Create ‘Person’, ‘MalePerson’ and ‘FemalePerson’ classes
-        OntClass person = ontModel.createClass(ns + "Person");
-        OntClass malePerson = ontModel.createClass(ns + "MalePerson");
-        OntClass femalePerson = ontModel.createClass(ns + "FemalePerson");
-        // FemalePerson and MalePerson are subclasses of Person
-        person.addSubClass(malePerson);
-        person.addSubClass(femalePerson);
-        // FemalePerson and MalePerson are disjoint
-        malePerson.addDisjointWith(femalePerson);
-        femalePerson.addDisjointWith(malePerson);
 
-        DatatypeProperty hasAge =  ontModel.createDatatypeProperty(ns + "hasAge");
-        // 'hasAge' takes integer values, so its range is 'integer'
-        // Basic datatypes are defined in the ‘vocabulary’ package
-        hasAge.setDomain(person); hasAge.setRange(XSD.integer);
-        // com.hp.hpl.jena.vocabulary.XSD
-        // Create individuals
-        Individual john = malePerson.createIndividual(ns + "John");
-        Individual jane = femalePerson.createIndividual(ns + "Jane");
-        Individual bob = malePerson.createIndividual(ns + "Bob");
-        // Create statement 'John hasAge 20'
-        Literal age20 =  ontModel.createTypedLiteral("20", XSDDatatype.XSDint);
-        Statement johnIs20 =  ontModel.createStatement(john, hasAge, age20);
-        ontModel.add(johnIs20);
+        // Coordinate Class
 
-        ontModel.write(System.out, "RDF/XML");
+        OntClass coordinate = ontModel.createClass(ns + "Coordinate");
+
+        // County Class
+
+        OntClass county = ontModel.createClass(ns + "County");
+
+        DatatypeProperty area = ontModel.createDatatypeProperty(ns + "area");
+        area.setDomain(county);
+        area.setRange(XSD.nonPositiveInteger);
+
+//        county.addProperty(null, "<http://www.opengis.net/ont/geosparql#asWKT>");
+
+        // School Class
+
+        OntClass school = ontModel.createClass(ns + "School");
+        DatatypeProperty boyCount = ontModel.createDatatypeProperty(ns + "boyCount");
+        boyCount.setDomain(school);
+        boyCount.setRange(XSD.nonNegativeInteger);
+
+        DatatypeProperty girlCount = ontModel.createDatatypeProperty(ns + "girlCount");
+        girlCount.setDomain(school);
+        girlCount.setRange(XSD.nonNegativeInteger);
+
+        DatatypeProperty studentCount = ontModel.createDatatypeProperty(ns + "studentCount");
+        studentCount.setDomain(school);
+        studentCount.setRange(XSD.positiveInteger);
+
+        DatatypeProperty inIsland = ontModel.createDatatypeProperty(ns + "inIsland");
+        inIsland.setDomain(school);
+        inIsland.setRange(XSD.xboolean);
+
+        ObjectProperty hasCoordinate = ontModel.createObjectProperty(ns + "hasCoordinate");
+       hasCoordinate.setDomain(school);
+       hasCoordinate.setRange(coordinate);
+
+        DatatypeProperty rollNumber = ontModel.createDatatypeProperty(ns + "rollNumber");
+        rollNumber.setDomain(school);
+        rollNumber.setRange(XSD.xstring);
+
+        DatatypeProperty name = ontModel.createDatatypeProperty(ns + "name");
+        name.setDomain(school);
+        name.setRange(XSD.xstring);
+
+        ObjectProperty inCounty = ontModel.createObjectProperty(ns + "inCounty");
+        inCounty.setDomain(school);
+        inCounty.setRange(county);
+
+        ObjectProperty hasSchools = ontModel.createObjectProperty(ns + "Object");
+        hasSchools.setDomain(county);
+        hasSchools.setRange(school);
+        hasSchools.addInverseOf(inCounty);
+
+
+        DatatypeProperty isDEIS = ontModel.createDatatypeProperty(ns + "isDEIS");
+        isDEIS.setDomain(school);
+        isDEIS.setRange(XSD.xboolean);
+
+        DatatypeProperty isGaeltacht = ontModel.createDatatypeProperty(ns + "isGaeltacht");
+        isGaeltacht.setDomain(school);
+        isGaeltacht.setRange(XSD.xboolean);
+
+        OntClass boySchool = ontModel.createClass(ns + "BoySchool");
+        OntClass girlSchool = ontModel.createClass(ns + "GirlSchool");
+        boySchool.addSuperClass(school);
+        girlSchool.addSuperClass(school);
+
+        DatatypeProperty address = ontModel.createDatatypeProperty(ns + "Address");
+        address.setDomain(school);
+        address.setRange(XSD.xstring);
+
+        RDFList list = ontModel.createList(new RDFNode[] { boySchool, girlSchool });
+        ontModel.createUnionClass(ns + "School", list);
+        boySchool.addDisjointWith(girlSchool);
+        girlSchool.addDisjointWith(boySchool);
+
+        boySchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, boyCount, 0));
+        girlSchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, girlCount, 0));
+
+        school.addSubClass(boySchool);
+        school.addSubClass(girlSchool);
+
+        OntClass catholic = ontModel.createClass(ns + "Catholic");
+        OntClass churchOfIreland = ontModel.createClass(ns + "ChurchOfIreland");
+        OntClass multiDenominational = ontModel.createClass(ns + "MultiDenominational");
+
+        RDFList ethosList = ontModel.createList(new RDFNode[] { catholic, churchOfIreland, multiDenominational });
+        OntClass ethos = ontModel.createUnionClass(ns + "ethos", ethosList);
+
+        DatatypeProperty ethoIs = ontModel.createDatatypeProperty(ns + "ethosIs");
+        ethoIs.setDomain(school);
+        ethoIs.setRange(ethos);
+
+        OntClass catholicSchool = ontModel.createClass(ns + "CatholicSchool");
+        catholicSchool.addSuperClass(school);
+        catholicSchool.addSuperClass(ontModel.createAllValuesFromRestriction(null, ethoIs, catholic));
+
+        try {
+            ontModel.write(new FileOutputStream(new File("temp/ireland-schools.ttl")), "TURTLE");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
