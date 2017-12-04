@@ -1,8 +1,5 @@
 import org.apache.jena.ontology.*;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
@@ -47,8 +44,11 @@ public class OntCreator {
         adjacentTo.setDomain(county);
         adjacentTo.setRange(county);
 
+        TransitiveProperty biggerThan = ontModel.createTransitiveProperty(ns + "biggerThan");
+        biggerThan.setDomain(county);
+        biggerThan.setRange(county);
+
         county.addSuperClass(ontModel.createCardinalityRestriction(null, area, 1));
-        county.addSuperClass(ontModel.createCardinalityRestriction(null, RDFS.label, 1));
 
         /****************** Ethos Class *********************/
 
@@ -63,12 +63,22 @@ public class OntCreator {
         churchOfIreland.addSuperClass(ethos);
         multiDenominational.addSuperClass(ethos);
 
+        /*********** subclasses of School **********/
+
+        OntClass boySchool = ontModel.createClass(ns + "BoySchool");
+        OntClass girlSchool = ontModel.createClass(ns + "GirlSchool");
+        OntClass mixedSchool = ontModel.createClass(ns + "MixedSchool");
+
+        RDFList list = ontModel.createList(new RDFNode[] { boySchool, girlSchool, mixedSchool });
+        boySchool.addDisjointWith(girlSchool);
+        mixedSchool.addDisjointWith(boySchool);
+        mixedSchool.addDisjointWith(girlSchool);
 
         /***************** School Class *******************/
 
-        OntClass school = ontModel.createClass(ns + "School");
+        OntClass school = ontModel.createUnionClass(ns + "School", list);
 
-        DatatypeProperty rollNumber = ontModel.createDatatypeProperty(ns + "rollNumber");
+        InverseFunctionalProperty rollNumber = ontModel.createInverseFunctionalProperty(ns + "rollNumber", true);
         rollNumber.setDomain(school);
         rollNumber.setRange(XSD.xstring);
 
@@ -94,9 +104,9 @@ public class OntCreator {
         inIsland.setDomain(school);
         inIsland.setRange(XSD.xboolean);
 
-        ObjectProperty hasCoordinate = ontModel.createObjectProperty(ns + "hasCoordinate");
-        hasCoordinate.setDomain(school);
-        hasCoordinate.setRange(geoLocation);
+        ObjectProperty hasGeoLocation = ontModel.createObjectProperty(ns + "hasGeoLocation");
+        hasGeoLocation.setDomain(school);
+        hasGeoLocation.setRange(geoLocation);
 
         ObjectProperty inCounty = ontModel.createObjectProperty(ns + "inCounty");
         inCounty.setDomain(school);
@@ -114,36 +124,21 @@ public class OntCreator {
         withEthos.setDomain(school);
         withEthos.setRange(ethos);
 
-        /*********** subclasses of School **********/
+        // Subclasses setup
 
-        OntClass boySchool = ontModel.createClass(ns + "BoySchool");
-        OntClass girlSchool = ontModel.createClass(ns + "GirlSchool");
-        OntClass mixedSchool = ontModel.createClass(ns + "MixedSchool");
         boySchool.addSuperClass(school);
         girlSchool.addSuperClass(school);
         mixedSchool.addSuperClass(school);
 
-        OntClass maleSchool = ontModel.createClass(ns + "MaleSchool");
-        OntClass femaleSchool = ontModel.createClass(ns + "FemaleSchool");
-        maleSchool.addEquivalentClass(boySchool);
-        femaleSchool.addEquivalentClass(girlSchool);
-
+        OntClass catholicSchool = ontModel.createClass(ns + "CatholicSchool");
+        catholicSchool.addSuperClass(school);
+        catholicSchool.addSuperClass(ontModel.createHasValueRestriction(null, withEthos, catholic));
 
         Literal zero =  ontModel.createTypedLiteral(0);
         boySchool.addSuperClass(ontModel.createHasValueRestriction(null, girlCount, zero));
         girlSchool.addSuperClass(ontModel.createHasValueRestriction(null, girlCount, zero));
-//    TODO:    mixedSchool.addSuperClass(ontModel.createAllDifferent());
 
-//      TODO:  rollNumber.isAllDifferent();
-
-        RDFList list = ontModel.createList(new RDFNode[] { boySchool, girlSchool, mixedSchool });
-        boySchool.addDisjointWith(girlSchool);
-        mixedSchool.addDisjointWith(boySchool);
-        mixedSchool.addDisjointWith(girlSchool);
-
-//  TODO:       school = ontModel.createUnionClass(ns + "School", list);
-
-        // county property
+        // County property
 
         ObjectProperty hasSchools = ontModel.createObjectProperty(ns + "hasSchools");
         hasSchools.setDomain(county);
@@ -154,13 +149,12 @@ public class OntCreator {
         /************** School Cardinality Restrictions **************/
 
         school.addSuperClass(ontModel.createCardinalityRestriction(null, rollNumber, 1));
-        school.addSuperClass(ontModel.createCardinalityRestriction(null, RDFS.label, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, address, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, boyCount, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, girlCount, 1));
-        school.addSuperClass(ontModel.createMinCardinalityRestriction(null, studentCount, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, studentCount, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, inIsland, 1));
-        school.addSuperClass(ontModel.createCardinalityRestriction(null, hasCoordinate, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, hasGeoLocation, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, inCounty, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, withEthos, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, isDEIS, 1));
