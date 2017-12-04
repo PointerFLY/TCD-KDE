@@ -68,15 +68,6 @@ public class CreateModel {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        try
-        {
-            ReadModel.loadAllClassesOnt(ontologyName);
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public static void writeToFile(String filename)
