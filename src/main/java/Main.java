@@ -96,11 +96,14 @@ public class Main {
 
         OntClass county = ontModel.createClass(ns + "County");
 
+        DatatypeProperty countyName = ontModel.createDatatypeProperty(ns + "countyName");
+        countyName.setDomain(county);
+        countyName.setRange(XSD.xstring);
+
         DatatypeProperty area = ontModel.createDatatypeProperty(ns + "area");
         area.setDomain(county);
         area.setRange(XSD.nonPositiveInteger);
 
-//        county.addProperty(null, "<http://www.opengis.net/ont/geosparql#asWKT>");
 
         // School Class
 
@@ -122,8 +125,8 @@ public class Main {
         inIsland.setRange(XSD.xboolean);
 
         ObjectProperty hasCoordinate = ontModel.createObjectProperty(ns + "hasCoordinate");
-       hasCoordinate.setDomain(school);
-       hasCoordinate.setRange(coordinate);
+        hasCoordinate.setDomain(school);
+        hasCoordinate.setRange(coordinate);
 
         DatatypeProperty rollNumber = ontModel.createDatatypeProperty(ns + "rollNumber");
         rollNumber.setDomain(school);
@@ -165,8 +168,8 @@ public class Main {
         boySchool.addDisjointWith(girlSchool);
         girlSchool.addDisjointWith(boySchool);
 
-        boySchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, boyCount, 0));
-        girlSchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, girlCount, 0));
+        boySchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, girlCount, 0));
+        girlSchool.addSuperClass(ontModel.createMaxCardinalityRestriction(null, boyCount, 0));
 
         school.addSubClass(boySchool);
         school.addSubClass(girlSchool);
@@ -176,15 +179,27 @@ public class Main {
         OntClass multiDenominational = ontModel.createClass(ns + "MultiDenominational");
 
         RDFList ethosList = ontModel.createList(new RDFNode[] { catholic, churchOfIreland, multiDenominational });
-        OntClass ethos = ontModel.createUnionClass(ns + "ethos", ethosList);
+        OntClass ethos = ontModel.createEnumeratedClass(ns + "ethos", ethosList);
 
         DatatypeProperty ethoIs = ontModel.createDatatypeProperty(ns + "ethosIs");
         ethoIs.setDomain(school);
         ethoIs.setRange(ethos);
 
-        OntClass catholicSchool = ontModel.createClass(ns + "CatholicSchool");
-        catholicSchool.addSuperClass(school);
-        catholicSchool.addSuperClass(ontModel.createAllValuesFromRestriction(null, ethoIs, catholic));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, ethoIs, 1));
+        school.addSuperClass(ontModel.createMinCardinalityRestriction(null, studentCount, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, rollNumber, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, name, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, inCounty, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, hasCoordinate, 1));
+
+        county.addSuperClass(ontModel.createCardinalityRestriction(null, countyName, 1));
+        county.addSuperClass(ontModel.createCardinalityRestriction(null, area, 1));
+
+        rollNumber.addDifferentFrom(rollNumber);
+
+//        OntClass catholicSchool = ontModel.createClass(ns + "CatholicSchool");
+//        catholicSchool.addSuperClass(school);
+//        catholicSchool.addSuperClass(ontModel.createAllValuesFromRestriction(null, ethoIs, catholic));
 
         try {
             ontModel.write(new FileOutputStream(new File("temp/ireland-schools.ttl")), "TURTLE");
