@@ -145,41 +145,59 @@ public class OntCreator {
 
         /************** School Cardinality Restrictions **************/
 
-        school.addSuperClass(ontModel.createCardinalityRestriction(null, rollNumber, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, address, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, boyCount, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, girlCount, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, studentCount, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, inIsland, 1));
-        school.addSuperClass(ontModel.createCardinalityRestriction(null, hasGeoLocation, 1));
+        school.addSuperClass(ontModel.createCardinalityRestriction(null, location, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, inCounty, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, withEthos, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, isDEIS, 1));
         school.addSuperClass(ontModel.createCardinalityRestriction(null, isGaeltacht, 1));
 
 
-        try {
-            ontModel.write(new FileWriter(FileUtils.ONTOLOGY_PATH), "TURTLE");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    public static void createIndividuals() {
+
+        /* ---------------------   Split Line  ---------------------------- */
+        /********************** creator individuals *************************/
+
         try {
             FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
             CSVParser schoolCSV = CSVFormat.DEFAULT.parse(in);
 
             Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
             Iterator<Statement> statements = countyRDF.listStatements();
-            FileWriter writer = new FileWriter("temp/1.txt");
             while (statements.hasNext()) {
-                writer.write(statements.next().toString() + "\n");
                 System.out.println(statements.next());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            OntModel ontModel = ModelFactory.createOntologyModel();
-            ontModel.read(FileUtils.ONTOLOGY_PATH);
+        Individual school1 = school.createIndividual(NAMESPACE + "12312R");
+        Individual geoLocation1 = geoLocation.createIndividual();
+        geoLocation1.addLiteral(latitude, -12);
+        geoLocation1.addLiteral(longitude, 123);
+        Statement statement1 = ontModel.createStatement(school1, location, geoLocation1);
+        ontModel.add(statement1);
+
+        Literal address1 = ontModel.createLiteral("AFFSDF, SDFSDF, DSFSDF");
+        Statement statement2 = ontModel.createStatement(school1, address, address1);
+        ontModel.add(statement2);
+
+
+
+
+        /* ---------------------   Split Line  ---------------------------- */
+        /************************** Persistence **********************/
+
+        writeToFile(ontModel);
+    }
+
+    public static void writeToFile(OntModel ontModel) {
+        try {
+            ontModel.write(new FileWriter(FileUtils.ONTOLOGY_PATH), "TURTLE");
         } catch (Exception e) {
             e.printStackTrace();
         }
