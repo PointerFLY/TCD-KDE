@@ -1,11 +1,12 @@
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.XSD;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
+import java.util.Iterator;
 
 public class OntCreator {
 
@@ -56,7 +57,7 @@ public class OntCreator {
         OntClass churchOfIreland = ontModel.createClass(ns + "ChurchOfIreland");
         OntClass multiDenominational = ontModel.createClass(ns + "MultiDenominational");
 
-        RDFList ethosList = ontModel.createList(new RDFNode[] { catholic, churchOfIreland, multiDenominational });
+        RDFList ethosList = ontModel.createList(new RDFNode[]{catholic, churchOfIreland, multiDenominational});
         OntClass ethos = ontModel.createEnumeratedClass(ns + "Ethos", ethosList);
 
         catholic.addSuperClass(ethos);
@@ -69,7 +70,7 @@ public class OntCreator {
         OntClass girlSchool = ontModel.createClass(ns + "GirlSchool");
         OntClass mixedSchool = ontModel.createClass(ns + "MixedSchool");
 
-        RDFList list = ontModel.createList(new RDFNode[] { boySchool, girlSchool, mixedSchool });
+        RDFList list = ontModel.createList(new RDFNode[]{boySchool, girlSchool, mixedSchool});
         boySchool.addDisjointWith(girlSchool);
         mixedSchool.addDisjointWith(boySchool);
         mixedSchool.addDisjointWith(girlSchool);
@@ -134,7 +135,7 @@ public class OntCreator {
         catholicSchool.addSuperClass(school);
         catholicSchool.addSuperClass(ontModel.createHasValueRestriction(null, withEthos, catholic));
 
-        Literal zero =  ontModel.createTypedLiteral(0);
+        Literal zero = ontModel.createTypedLiteral(0);
         boySchool.addSuperClass(ontModel.createHasValueRestriction(null, girlCount, zero));
         girlSchool.addSuperClass(ontModel.createHasValueRestriction(null, girlCount, zero));
 
@@ -162,13 +163,29 @@ public class OntCreator {
 
 
         try {
-            ontModel.write(new FileOutputStream(new File("temp/ireland-schools.ttl")), "TURTLE");
-        } catch (FileNotFoundException e) {
+            ontModel.write(new FileWriter(FileUtils.ONTOLOGY_PATH), "TURTLE");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void createInstance() {
-        // TODO: Instance creation
+    public static void createIndividuals() {
+        try {
+            FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
+            CSVParser schoolCSV = CSVFormat.DEFAULT.parse(in);
+
+            Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
+            Iterator<Statement> statements = countyRDF.listStatements();
+            FileWriter writer = new FileWriter("temp/1.txt");
+            while (statements.hasNext()) {
+                writer.write(statements.next().toString() + "\n");
+                System.out.println(statements.next());
+            }
+
+            OntModel ontModel = ModelFactory.createOntologyModel();
+            ontModel.read(FileUtils.ONTOLOGY_PATH);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
