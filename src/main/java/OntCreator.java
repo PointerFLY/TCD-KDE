@@ -4,9 +4,7 @@ import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.XSD;
-
 import java.io.*;
-import java.util.Iterator;
 
 public class OntCreator {
 
@@ -16,7 +14,7 @@ public class OntCreator {
     public static void createOntology() {
         OntModel ontModel = ModelFactory.createOntologyModel();
 
-        // Coordinate Class
+        // GeoLocation Class
 
         OntClass geoLocation = ontModel.createClass(NAMESPACE + "GeoLocation");
 
@@ -165,29 +163,37 @@ public class OntCreator {
         try {
             FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
             CSVParser schoolCSV = CSVFormat.DEFAULT.parse(in);
-
-            Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
-            Iterator<Statement> statements = countyRDF.listStatements();
-            while (statements.hasNext()) {
-                System.out.println(statements.next());
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Individual school1 = school.createIndividual(NAMESPACE + "12312R");
+        Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
+
+
+        Individual school1 = boySchool.createIndividual(NAMESPACE + "00000");
+        school1.addOntClass(school);
+        school1.addOntClass(catholicSchool);
         Individual geoLocation1 = geoLocation.createIndividual();
         geoLocation1.addLiteral(latitude, -12);
         geoLocation1.addLiteral(longitude, 123);
         Statement statement1 = ontModel.createStatement(school1, location, geoLocation1);
         ontModel.add(statement1);
 
-        Literal address1 = ontModel.createLiteral("AFFSDF, SDFSDF, DSFSDF");
-        Statement statement2 = ontModel.createStatement(school1, address, address1);
-        ontModel.add(statement2);
+        Property hasGeometry = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#hasGeometry");
+        ResIterator subjects = countyRDF.listSubjectsWithProperty(hasGeometry);
 
+        while (subjects.hasNext()) {
+            Resource sub = subjects.next();
+            System.out.println(sub);
 
+            Resource geometry = countyRDF.listObjectsOfProperty(sub, hasGeometry).next().asResource();
+            Property asWKT = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#asWKT");
+            RDFNode wkt = countyRDF.listObjectsOfProperty(geometry, asWKT).next();
 
+            System.out.println(wkt);
+        }
+
+        
 
         /* ---------------------   Split Line  ---------------------------- */
         /************************** Persistence **********************/
