@@ -10,18 +10,18 @@ import java.util.Iterator;
 
 public class OntCreator {
 
-    public static void createOntology() {
-        String baseURI = "http://www.cs7is1.com/assignment2/ireland-schools";
-        String ns = baseURI + "#";
+    private final static String BASE_URI = "http://www.cs7is1.com/assignment2/ireland-schools";
+    private final static String NAMESPACE = BASE_URI +"#";
 
+    public static void createOntology() {
         OntModel ontModel = ModelFactory.createOntologyModel();
 
         // Coordinate Class
 
-        OntClass geoLocation = ontModel.createClass(ns + "GeoLocation");
+        OntClass geoLocation = ontModel.createClass(NAMESPACE + "GeoLocation");
 
-        DatatypeProperty latitude = ontModel.createDatatypeProperty(ns + "latitude");
-        DatatypeProperty longitude = ontModel.createDatatypeProperty(ns + "longitude");
+        DatatypeProperty latitude = ontModel.createDatatypeProperty(NAMESPACE + "latitude");
+        DatatypeProperty longitude = ontModel.createDatatypeProperty(NAMESPACE + "longitude");
         latitude.setDomain(geoLocation);
         latitude.setRange(XSD.decimal);
         longitude.setDomain(geoLocation);
@@ -33,19 +33,19 @@ public class OntCreator {
 
         /****************** County Class *******************/
 
-        OntClass county = ontModel.createClass(ns + "County");
+        OntClass county = ontModel.createClass(NAMESPACE + "County");
 
         // RDFS: label for name
 
-        DatatypeProperty area = ontModel.createDatatypeProperty(ns + "area");
+        DatatypeProperty area = ontModel.createDatatypeProperty(NAMESPACE + "area");
         area.setDomain(county);
         area.setRange(XSD.nonPositiveInteger);
 
-        SymmetricProperty adjacentTo = ontModel.createSymmetricProperty(ns + "adjacentTo");
+        SymmetricProperty adjacentTo = ontModel.createSymmetricProperty(NAMESPACE + "adjacentTo");
         adjacentTo.setDomain(county);
         adjacentTo.setRange(county);
 
-        TransitiveProperty biggerThan = ontModel.createTransitiveProperty(ns + "biggerThan");
+        TransitiveProperty biggerThan = ontModel.createTransitiveProperty(NAMESPACE + "biggerThan");
         biggerThan.setDomain(county);
         biggerThan.setRange(county);
 
@@ -53,12 +53,12 @@ public class OntCreator {
 
         /****************** Ethos Class *********************/
 
-        OntClass catholic = ontModel.createClass(ns + "Catholic");
-        OntClass churchOfIreland = ontModel.createClass(ns + "ChurchOfIreland");
-        OntClass multiDenominational = ontModel.createClass(ns + "MultiDenominational");
+        OntClass catholic = ontModel.createClass(NAMESPACE + "Catholic");
+        OntClass churchOfIreland = ontModel.createClass(NAMESPACE + "ChurchOfIreland");
+        OntClass multiDenominational = ontModel.createClass(NAMESPACE + "MultiDenominational");
 
         RDFList ethosList = ontModel.createList(new RDFNode[]{catholic, churchOfIreland, multiDenominational});
-        OntClass ethos = ontModel.createEnumeratedClass(ns + "Ethos", ethosList);
+        OntClass ethos = ontModel.createEnumeratedClass(NAMESPACE + "Ethos", ethosList);
 
         catholic.addSuperClass(ethos);
         churchOfIreland.addSuperClass(ethos);
@@ -66,9 +66,9 @@ public class OntCreator {
 
         /*********** subclasses of School **********/
 
-        OntClass boySchool = ontModel.createClass(ns + "BoySchool");
-        OntClass girlSchool = ontModel.createClass(ns + "GirlSchool");
-        OntClass mixedSchool = ontModel.createClass(ns + "MixedSchool");
+        OntClass boySchool = ontModel.createClass(NAMESPACE + "BoySchool");
+        OntClass girlSchool = ontModel.createClass(NAMESPACE + "GirlSchool");
+        OntClass mixedSchool = ontModel.createClass(NAMESPACE + "MixedSchool");
 
         RDFList list = ontModel.createList(new RDFNode[]{boySchool, girlSchool, mixedSchool});
         boySchool.addDisjointWith(girlSchool);
@@ -77,51 +77,47 @@ public class OntCreator {
 
         /***************** School Class *******************/
 
-        OntClass school = ontModel.createUnionClass(ns + "School", list);
-
-        InverseFunctionalProperty rollNumber = ontModel.createInverseFunctionalProperty(ns + "rollNumber", true);
-        rollNumber.setDomain(school);
-        rollNumber.setRange(XSD.xstring);
+        OntClass school = ontModel.createUnionClass(NAMESPACE + "School", list);
 
         // RDFS:label for name
 
-        DatatypeProperty address = ontModel.createDatatypeProperty(ns + "address");
+        DatatypeProperty address = ontModel.createDatatypeProperty(NAMESPACE + "address");
         address.setDomain(school);
         address.setRange(XSD.xstring);
 
-        DatatypeProperty boyCount = ontModel.createDatatypeProperty(ns + "boyCount");
+        DatatypeProperty boyCount = ontModel.createDatatypeProperty(NAMESPACE + "boyCount");
         boyCount.setDomain(school);
         boyCount.setRange(XSD.nonNegativeInteger);
 
-        DatatypeProperty girlCount = ontModel.createDatatypeProperty(ns + "girlCount");
+        DatatypeProperty girlCount = ontModel.createDatatypeProperty(NAMESPACE + "girlCount");
         girlCount.setDomain(school);
         girlCount.setRange(XSD.nonNegativeInteger);
 
-        DatatypeProperty studentCount = ontModel.createDatatypeProperty(ns + "studentCount");
+        DatatypeProperty studentCount = ontModel.createDatatypeProperty(NAMESPACE + "studentCount");
         studentCount.setDomain(school);
         studentCount.setRange(XSD.positiveInteger);
 
-        DatatypeProperty inIsland = ontModel.createDatatypeProperty(ns + "inIsland");
+        DatatypeProperty inIsland = ontModel.createDatatypeProperty(NAMESPACE + "inIsland");
         inIsland.setDomain(school);
         inIsland.setRange(XSD.xboolean);
 
-        ObjectProperty hasGeoLocation = ontModel.createObjectProperty(ns + "hasGeoLocation");
-        hasGeoLocation.setDomain(school);
-        hasGeoLocation.setRange(geoLocation);
+        ObjectProperty location = ontModel.createObjectProperty(NAMESPACE + "location");
+        location.setDomain(school);
+        location.setRange(geoLocation);
 
-        ObjectProperty inCounty = ontModel.createObjectProperty(ns + "inCounty");
+        ObjectProperty inCounty = ontModel.createObjectProperty(NAMESPACE + "inCounty");
         inCounty.setDomain(school);
         inCounty.setRange(county);
 
-        DatatypeProperty isDEIS = ontModel.createDatatypeProperty(ns + "isDEIS");
+        DatatypeProperty isDEIS = ontModel.createDatatypeProperty(NAMESPACE + "isDEIS");
         isDEIS.setDomain(school);
         isDEIS.setRange(XSD.xboolean);
 
-        DatatypeProperty isGaeltacht = ontModel.createDatatypeProperty(ns + "isGaeltacht");
+        DatatypeProperty isGaeltacht = ontModel.createDatatypeProperty(NAMESPACE + "isGaeltacht");
         isGaeltacht.setDomain(school);
         isGaeltacht.setRange(XSD.xboolean);
 
-        DatatypeProperty withEthos = ontModel.createDatatypeProperty(ns + "withEthos");
+        DatatypeProperty withEthos = ontModel.createDatatypeProperty(NAMESPACE + "withEthos");
         withEthos.setDomain(school);
         withEthos.setRange(ethos);
 
@@ -131,7 +127,7 @@ public class OntCreator {
         girlSchool.addSuperClass(school);
         mixedSchool.addSuperClass(school);
 
-        OntClass catholicSchool = ontModel.createClass(ns + "CatholicSchool");
+        OntClass catholicSchool = ontModel.createClass(NAMESPACE + "CatholicSchool");
         catholicSchool.addSuperClass(school);
         catholicSchool.addSuperClass(ontModel.createHasValueRestriction(null, withEthos, catholic));
 
@@ -141,7 +137,7 @@ public class OntCreator {
 
         // County property
 
-        ObjectProperty hasSchools = ontModel.createObjectProperty(ns + "hasSchools");
+        ObjectProperty hasSchools = ontModel.createObjectProperty(NAMESPACE + "hasSchools");
         hasSchools.setDomain(county);
         hasSchools.setRange(school);
         hasSchools.addInverseOf(inCounty);

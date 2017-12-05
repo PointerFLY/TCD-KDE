@@ -6,7 +6,6 @@ public class Main {
         FileUtils.fetchData();
 
         OntCreator.createOntology();
-        OntCreator.createIndividuals();
 
         QueryWindow window = new QueryWindow();
         window.launch();
