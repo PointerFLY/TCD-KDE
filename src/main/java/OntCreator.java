@@ -1,10 +1,19 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.jena.base.Sys;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.reasoner.rulesys.builtins.Print;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+
+import javax.naming.Name;
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OntCreator {
 
@@ -160,6 +169,61 @@ public class OntCreator {
         /* ---------------------   Split Line  ---------------------------- */
         /********************** creator individuals *************************/
 
+        Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
+
+        ArrayList<ArrayList<Object>> countyInfoList = new ArrayList<>();
+        ResIterator countyResIter = countyRDF.listResourcesWithProperty(RDFS.label);
+
+        Property hasGeometry = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#hasGeometry");
+        Property asWKT = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#asWKT");
+
+        while (countyResIter.hasNext()) {
+            Resource res = countyResIter.next();
+
+            // labels
+            NodeIterator labelsIter = countyRDF.listObjectsOfProperty(res, RDFS.label);
+            List<RDFNode> labels = labelsIter.toList();
+            String idLabel = "";
+            String gaLabel = "";
+            String enLabel = "";
+
+            for (RDFNode label : labels) {
+                String labelText = label.toString();
+                if (labelText.contains("@ga")) {
+                    gaLabel = labelText;
+                } else if (labelText.contains("@en")) {
+                    enLabel = labelText;
+                } else {
+                    idLabel = labelText;
+                }
+            }
+
+            // WKT
+            Resource geometry = countyRDF.listObjectsOfProperty(res, hasGeometry).next().asResource();
+            String wkt = countyRDF.listObjectsOfProperty(geometry, asWKT).next().toString();
+
+            ArrayList<Object> info = new ArrayList<>();
+            info.add(idLabel);
+            info.add(enLabel);
+            info.add(gaLabel);
+            info.add(wkt);
+            countyInfoList.add(info);
+
+            System.out.println(info);
+        }
+
+        for (ArrayList<Object> info : countyInfoList) {
+            Individual aCounty = county.createIndividual(NAMESPACE + info.get(0));
+            aCounty.addLiteral(RDFS.label, info.get(0));
+            aCounty.addLiteral(RDFS.label, info.get(1));
+            aCounty.addLiteral(RDFS.label, info.get(2));
+            aCounty.addLiteral(area, 100);
+            aCounty.addProperty(adjacentTo, aCounty);
+            aCounty.addProperty(biggerThan, aCounty);
+            aCounty.addProperty(hasSchools, school.createIndividual());
+        }
+
+
         try {
             FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
             CSVParser schoolCSV = CSVFormat.DEFAULT.parse(in);
@@ -167,33 +231,17 @@ public class OntCreator {
             e.printStackTrace();
         }
 
-        Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
+//
+//        Individual school1 = boySchool.createIndividual(NAMESPACE + "00000");
+//        school1.addOntClass(school);
+//        school1.addOntClass(catholicSchool);
+//        Individual geoLocation1 = geoLocation.createIndividual();
+//        geoLocation1.addLiteral(latitude, -12);
+//        geoLocation1.addLiteral(longitude, 123);
+//        Statement statement1 = ontModel.createStatement(school1, location, geoLocation1);
+//        ontModel.add(statement1);
 
 
-        Individual school1 = boySchool.createIndividual(NAMESPACE + "00000");
-        school1.addOntClass(school);
-        school1.addOntClass(catholicSchool);
-        Individual geoLocation1 = geoLocation.createIndividual();
-        geoLocation1.addLiteral(latitude, -12);
-        geoLocation1.addLiteral(longitude, 123);
-        Statement statement1 = ontModel.createStatement(school1, location, geoLocation1);
-        ontModel.add(statement1);
-
-        Property hasGeometry = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#hasGeometry");
-        ResIterator subjects = countyRDF.listSubjectsWithProperty(hasGeometry);
-
-        while (subjects.hasNext()) {
-            Resource sub = subjects.next();
-            System.out.println(sub);
-
-            Resource geometry = countyRDF.listObjectsOfProperty(sub, hasGeometry).next().asResource();
-            Property asWKT = countyRDF.getProperty("http://www.opengis.net/ont/geosparql#asWKT");
-            RDFNode wkt = countyRDF.listObjectsOfProperty(geometry, asWKT).next();
-
-            System.out.println(wkt);
-        }
-
-        
 
         /* ---------------------   Split Line  ---------------------------- */
         /************************** Persistence **********************/
