@@ -1,6 +1,7 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
@@ -26,9 +27,9 @@ public class OntCreator {
         DatatypeProperty latitude = ontModel.createDatatypeProperty(NAMESPACE + "latitude");
         DatatypeProperty longitude = ontModel.createDatatypeProperty(NAMESPACE + "longitude");
         latitude.setDomain(geoLocation);
-        latitude.setRange(XSD.decimal);
+        latitude.setRange(XSD.xfloat);
         longitude.setDomain(geoLocation);
-        longitude.setRange(XSD.decimal);
+        longitude.setRange(XSD.xfloat);
 
         geoLocation.addSuperClass(ontModel.createCardinalityRestriction(null, latitude, 1));
         geoLocation.addSuperClass(ontModel.createCardinalityRestriction(null, longitude, 1));
@@ -42,7 +43,7 @@ public class OntCreator {
 
         DatatypeProperty area = ontModel.createDatatypeProperty(NAMESPACE + "area");
         area.setDomain(county);
-        area.setRange(XSD.nonPositiveInteger);
+        area.setRange(XSD.xfloat);
 
         SymmetricProperty adjacentTo = ontModel.createSymmetricProperty(NAMESPACE + "adjacentTo");
         adjacentTo.setDomain(county);
@@ -211,7 +212,7 @@ public class OntCreator {
             aCounty.addLiteral(RDFS.label, info.get(0));
             aCounty.addLiteral(RDFS.label, info.get(1));
             aCounty.addLiteral(RDFS.label, info.get(2));
-            aCounty.addLiteral(area, 100);
+            aCounty.addLiteral(area, Float.parseFloat("100.21"));
             aCounty.addProperty(adjacentTo, aCounty);
             aCounty.addProperty(biggerThan, aCounty);
             aCounty.addProperty(hasSchools, school.createIndividual());
@@ -235,8 +236,8 @@ public class OntCreator {
                 boolean aIsGaeltacht = record.get(11) == "N";
 
                 Individual aLocation = geoLocation.createIndividual();
-                aLocation.addLiteral(latitude, record.get(18));
-                aLocation.addLiteral(longitude, record.get(17));
+                aLocation.addLiteral(latitude, Float.parseFloat(record.get(18)));
+                aLocation.addLiteral(longitude, Float.parseFloat(record.get(17)));
 
                 Individual aCounty = county.createIndividual(NAMESPACE + "CAVAN");
 
@@ -267,9 +268,9 @@ public class OntCreator {
 
                 aSchool.addLiteral(RDFS.label, aLabel);
                 aSchool.addLiteral(address, aAddress);
-                aSchool.addLiteral(boyCount, aBoyCount);
-                aSchool.addLiteral(girlCount, aGirlCount);
-                aSchool.addLiteral(studentCount, aStudentCount);
+                aSchool.addLiteral(boyCount, ontModel.createTypedLiteral(aBoyCount, XSDDatatype.XSDnonNegativeInteger));
+                aSchool.addLiteral(girlCount, ontModel.createTypedLiteral(aGirlCount, XSDDatatype.XSDnonNegativeInteger));
+                aSchool.addLiteral(studentCount, ontModel.createTypedLiteral(aStudentCount, XSDDatatype.XSDpositiveInteger));
                 aSchool.addLiteral(inIsland, aInIsland);
                 aSchool.addLiteral(isDEIS, aIsDeis);
                 aSchool.addLiteral(isGaeltacht, aIsGaeltacht);
