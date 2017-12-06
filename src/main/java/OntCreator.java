@@ -1,5 +1,7 @@
+import jdk.nashorn.internal.ir.LiteralNode;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.jena.base.Sys;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
@@ -8,6 +10,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.apache.xerces.dom3.as.ASContentModel;
 
 import javax.naming.Name;
 import java.io.*;
@@ -208,8 +211,6 @@ public class OntCreator {
             info.add(gaLabel);
             info.add(wkt);
             countyInfoList.add(info);
-
-            System.out.println(info);
         }
 
         for (ArrayList<Object> info : countyInfoList) {
@@ -223,23 +224,82 @@ public class OntCreator {
             aCounty.addProperty(hasSchools, school.createIndividual());
         }
 
+//        School:
+//        RDFS:label
+//                address
+//        boyCount
+//                girCount
+//        studentCount
+//                inIsland
+//        location: GeoLocation
+//        inCounty: County
+//                isDEIS
+//        isGaeltacht
+//        withEthos: Ethos
 
         try {
             FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
             CSVParser schoolCSV = CSVFormat.DEFAULT.parse(in);
+            List<CSVRecord> records = schoolCSV.getRecords();
+            records.remove(0);
+
+            for (CSVRecord record : records) {
+                String aRollNumber = record.get(1);
+                String aLabel = record.get(2);
+                String aAddress = record.get(3) + ", " + record.get(4) + ", " + record.get(5) + ", " + record.get(6);
+                int aBoyCount = Integer.parseInt(record.get(12));
+                int aGirlCount = Integer.parseInt(record.get(13));
+                int aStudentCount = Integer.parseInt(record.get(14));
+                boolean aInIsland = record.get(9) == "N";
+                boolean aIsDeis = record.get(10) == "N";
+                boolean aIsGaeltacht = record.get(11) == "N";
+
+                Individual aLocation = geoLocation.createIndividual();
+                aLocation.addLiteral(latitude, record.get(18));
+                aLocation.addLiteral(longitude, record.get(17));
+
+                Individual aCounty = county.createIndividual(NAMESPACE + "CAVAN");
+
+                String ethosString = record.get(8);
+                Individual aEthosType;
+                if (ethosString == "CATHOLIC") {
+                    aEthosType = catholic.createIndividual();
+                } else if (ethosString == "CHURCH OF IRELAND") {
+                    aEthosType = churchOfIreland.createIndividual();
+                } else {
+                    aEthosType = multiDenominational.createIndividual();
+                }
+
+                // Create school classes
+
+                Individual aSchool;
+                if (aBoyCount == 0) {
+                    aSchool = girlSchool.createIndividual(NAMESPACE + aRollNumber);
+                } else if (aGirlCount == 0) {
+                    aSchool = boySchool.createIndividual(NAMESPACE + aRollNumber);
+                } else {
+                    aSchool = mixedSchool.createIndividual(NAMESPACE + aRollNumber);
+                }
+                aSchool.addOntClass(school);
+                if (ethosString == "CATHOLIC") {
+                    aSchool.addOntClass(catholicSchool);
+                }
+
+                aSchool.addLiteral(RDFS.label, aLabel);
+                aSchool.addLiteral(address, aAddress);
+                aSchool.addLiteral(boyCount, aBoyCount);
+                aSchool.addLiteral(girlCount, aGirlCount);
+                aSchool.addLiteral(studentCount, aStudentCount);
+                aSchool.addLiteral(inIsland, aInIsland);
+                aSchool.addLiteral(isDEIS, aIsDeis);
+                aSchool.addLiteral(isGaeltacht, aIsGaeltacht);
+                aSchool.addProperty(withEthos, aEthosType);
+                aSchool.addProperty(location, aLocation);
+                aSchool.addProperty(inCounty, aCounty);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//
-//        Individual school1 = boySchool.createIndividual(NAMESPACE + "00000");
-//        school1.addOntClass(school);
-//        school1.addOntClass(catholicSchool);
-//        Individual geoLocation1 = geoLocation.createIndividual();
-//        geoLocation1.addLiteral(latitude, -12);
-//        geoLocation1.addLiteral(longitude, 123);
-//        Statement statement1 = ontModel.createStatement(school1, location, geoLocation1);
-//        ontModel.add(statement1);
 
 
 
