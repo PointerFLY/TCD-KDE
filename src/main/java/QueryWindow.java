@@ -5,11 +5,14 @@ import java.awt.event.ActionEvent;
 
 public class QueryWindow extends JFrame {
 
-    QueryHub hub;
+    private QueryHub hub;
+
+    private String[] questions;
 
     public QueryWindow() {
         super();
         hub = new QueryHub();
+        initQuestions();
         setupUI();
     }
 
@@ -17,21 +20,21 @@ public class QueryWindow extends JFrame {
         this.setVisible(true);
     }
 
+    void initQuestions() {
+        questions = new String[20];
+        for (int i = 0; i < 20; i++) {
+            questions[i] = "question" + i;
+        }
+    }
 
-    private String query(String question) {
-        //query here
-        return question;
+    private String query(int idx) {
+        return hub.executeQuery(idx);
     }
 
     private void setupUI() {
         int windowWidth = 800;
         int windowHeight = 600;
         int margin = 20;
-
-        String[] questions = new String[20];
-        for (int i = 0; i < 20; i++) {
-            questions[i] = "question" + i;
-        }
 
         JList questionList = new JList<>(questions);
         questionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -54,9 +57,9 @@ public class QueryWindow extends JFrame {
 
         executeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Object i = questionList.getSelectedValue();
-                String question = i.toString();
-                resultTextArea.setText(query(question));
+                int idx = questionList.getSelectedIndex();
+                String resultTxt = query(idx);
+                resultTextArea.setText(resultTxt);
             }
         });
 

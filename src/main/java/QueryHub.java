@@ -20,13 +20,18 @@ public class QueryHub {
         // TODO: Initialize queries with file from resources/queries
     }
 
-    public void executeQuery(int number) {
+    public String executeQuery(int number) {
         // TODO: A callback for GUI
-        try {
-            query(model, queries.get(number));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        return "unisdfdsfsdfs";
+
+//        try {
+//            query(model, queries.get(number));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return "";
     }
 
     private void query(Model model, String queryString) throws IOException {
