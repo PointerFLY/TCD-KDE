@@ -8,7 +8,7 @@ public class FileUtils {
 
     public static final String COUNTY_PATH = "temp/county.ttl";
     public static final String SCHOOL_CSV_PATH = "temp/school.csv";
-    public static final String ONTOLOGY_PATH =  "temp/ireland-schools.ttl";
+    public static final String ONTOLOGY_PATH =  "temp/ireland-school-county.ttl";
 
     private static final String COUNTY_URL = "http://data.geohive.ie/dumps/county/default.ttl";
     private static final String SCHOOL_URL = "http://airo.maynoothuniversity.ie/files/dDATASTORE/education/csv/primary_schools_2013_2014.csv";

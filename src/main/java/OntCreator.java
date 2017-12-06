@@ -1,7 +1,7 @@
+import com.esri.core.geometry.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.jena.base.Sys;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
@@ -11,11 +11,12 @@ import org.apache.jena.vocabulary.XSD;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class OntCreator {
 
-    private final static String BASE_URI = "http://www.cs7is1.com/assignment2/ireland-schools";
+    private final static String BASE_URI = "http://www.cs7is1.com/ireland-school-county";
     private final static String NAMESPACE = BASE_URI +"#";
 
     public static void createOntology() {
