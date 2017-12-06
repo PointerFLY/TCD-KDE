@@ -44,25 +44,12 @@ public class QueryHub {
     }
 
     private String queryWithTxt(String queryString) {
-        // TODO: Unvalidated code, sample code
-
-        // Execute the query and obtain results
         Query query = QueryFactory.create(queryString);
         QueryExecution queryExecution = QueryExecutionFactory.create(query, model);
         ResultSet results = queryExecution.execSelect();
 
-        // Output query results, special fix to display correctly UTF-8 encoded characters
-        // The fix create lines shorter that the other and breaks the nice formatting
         String resultTxt = ResultSetFormatter.asText(results);
-
-        try {
-            resultTxt = new String(resultTxt.getBytes("iso-8859-1"), "utf-8");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // Important - free up resources used when running the query
-            queryExecution.close();
-        }
+        queryExecution.close();
 
         return resultTxt;
     }

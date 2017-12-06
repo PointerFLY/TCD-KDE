@@ -88,5 +88,6 @@ public class QueryWindow extends JFrame {
         this.add(executeButton);
         this.add(resultPane);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setVisible(false);
     }
 }
