@@ -2,6 +2,11 @@ import javax.swing.*;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class QueryWindow extends JFrame {
 
@@ -20,10 +25,22 @@ public class QueryWindow extends JFrame {
         this.setVisible(true);
     }
 
-    void initQuestions() {
-        questions = new String[20];
-        for (int i = 0; i < 20; i++) {
-            questions[i] = "question" + i;
+    private void initQuestions() {
+        try {
+            File dir = new File(ClassLoader.getSystemResources("questions").nextElement().getFile());
+            File[] files = dir.listFiles();
+            Arrays.sort(files);
+
+            questions = new String[files.length];
+
+            for (int i = 0; i < files.length; i++) {
+                Path path = Paths.get(files[i].getPath());
+                byte[] bytes = Files.readAllBytes(path);
+                String queryTxt = new String(bytes);
+                questions[i] = queryTxt;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
