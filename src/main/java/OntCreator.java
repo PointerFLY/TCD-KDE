@@ -198,26 +198,63 @@ public class OntCreator {
             }
 
             // WKT
-            Resource geometry = countyRDF.listObjectsOfProperty(res, hasGeometry).next().asResource();
-            String wkt = countyRDF.listObjectsOfProperty(geometry, asWKT).next().toString();
+            Resource geoResource = countyRDF.listObjectsOfProperty(res, hasGeometry).next().asResource();
+            String wkt = countyRDF.listObjectsOfProperty(geoResource, asWKT).next().toString();
+            wkt = wkt.substring(0, wkt.indexOf("^^"));
+            OperatorImportFromWkt importer = OperatorImportFromWkt.local();
+            Geometry geometry = importer.execute(WktImportFlags.wktImportDefaults, Geometry.Type.Unknown, wkt, null);
 
             ArrayList<Object> info = new ArrayList<>();
             info.add(idLabel);
             info.add(enLabel);
             info.add(gaLabel);
-            info.add(wkt);
+            info.add(geometry);
+            // TODO: AREA unit correctness
+            info.add((float)geometry.calculateArea2D());
             countyInfoList.add(info);
         }
 
+        countyInfoList.sort(new Comparator<ArrayList<Object>>() {
+            @Override
+            public int compare(ArrayList<Object> o1, ArrayList<Object> o2) {
+                float area1 = (float)o1.get(4);
+                float area2 = (float)o2.get(4);
+                return area1 > area2 ? -1 : (area1 < area2) ? 1 : 0;
+            }
+        });
+
+        ArrayList<Individual> countyIndiList = new ArrayList<>();
         for (ArrayList<Object> info : countyInfoList) {
             Individual aCounty = county.createIndividual(NAMESPACE + info.get(0));
             aCounty.addLiteral(RDFS.label, info.get(0));
             aCounty.addLiteral(RDFS.label, info.get(1));
             aCounty.addLiteral(RDFS.label, info.get(2));
-            aCounty.addLiteral(area, Float.parseFloat("100.21"));
-            aCounty.addProperty(adjacentTo, aCounty);
-            aCounty.addProperty(biggerThan, aCounty);
-            aCounty.addProperty(hasSchools, school.createIndividual());
+            aCounty.addLiteral(area, (float)info.get(4));
+            // TODO: real hasSchool things
+//            aCounty.addProperty(hasSchools, school.createIndividual());
+
+            countyIndiList.add(aCounty);
+        }
+
+        for (Individual countyIndi : countyIndiList) {
+            int curIdx = countyIndiList.indexOf(countyIndi);
+            Geometry curGeometry = (Geometry)countyInfoList.get(curIdx).get(3);
+
+            for (int i = curIdx + 1; i < countyIndiList.size(); i++) {
+                if (i == curIdx) {
+                    continue;
+                }
+                Individual otherCountyIndi =  countyIndiList.get(i);
+                if (i > curIdx) {
+                    countyIndi.addProperty(biggerThan, otherCountyIndi);
+                }
+                Geometry otherGeometry = (Geometry)countyInfoList.get(i).get(3);
+                // TODO: Intersection not all correct, for instance, dublin
+                OperatorIntersects intersects = OperatorIntersects.local();
+                if (intersects.execute(curGeometry, otherGeometry, SpatialReference.create("WGS84"), null)) {
+                    countyIndi.addProperty(adjacentTo, otherCountyIndi);
+                }
+            }
         }
 
         try {
