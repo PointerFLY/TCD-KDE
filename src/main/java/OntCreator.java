@@ -1,4 +1,5 @@
 import com.esri.core.geometry.*;
+import com.github.jsonldjava.utils.Obj;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -282,10 +283,12 @@ public class OntCreator {
                 boolean aInIsland = record.get(9).equals("Y");
                 boolean aIsDeis = record.get(10).equals("Y");
                 boolean aIsGaeltacht = record.get(11).equals("Y");
+                float aLatitude = Float.parseFloat(record.get(18));
+                float aLongitude = Float.parseFloat(record.get(17));
 
                 Individual aLocation = geoLocation.createIndividual();
-                aLocation.addLiteral(latitude, Float.parseFloat(record.get(18)));
-                aLocation.addLiteral(longitude, Float.parseFloat(record.get(17)));
+                aLocation.addLiteral(latitude, aLatitude);
+                aLocation.addLiteral(longitude, aLongitude);
 
                 Individual aCounty = county.createIndividual(NAMESPACE + "CAVAN");
 
@@ -324,7 +327,18 @@ public class OntCreator {
                 aSchool.addLiteral(isGaeltacht, aIsGaeltacht);
                 aSchool.addProperty(withEthos, aEthosType);
                 aSchool.addProperty(location, aLocation);
-                aSchool.addProperty(inCounty, aCounty);
+
+                for (int i = 0; i < countyInfoList.size(); i++) {
+                    ArrayList<Object> countyInfo = countyInfoList.get(i);
+                    Geometry geometry = (Geometry)countyInfo.get(3);
+                    Point point = new Point(aLongitude, aLatitude);
+
+                    OperatorWithin within = OperatorWithin.local();
+                    if (within.execute(point, geometry, SpatialReference.create("WGS84"), null)) {
+                        aSchool.addProperty(inCounty, countyIndiList.get(i));
+                        countyIndiList.get(i).addProperty(hasSchools, aSchool);
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
