@@ -1,4 +1,3 @@
-import jdk.nashorn.internal.ir.LiteralNode;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -223,19 +222,6 @@ public class OntCreator {
             aCounty.addProperty(biggerThan, aCounty);
             aCounty.addProperty(hasSchools, school.createIndividual());
         }
-
-//        School:
-//        RDFS:label
-//                address
-//        boyCount
-//                girCount
-//        studentCount
-//                inIsland
-//        location: GeoLocation
-//        inCounty: County
-//                isDEIS
-//        isGaeltacht
-//        withEthos: Ethos
 
         try {
             FileReader in = new FileReader(FileUtils.SCHOOL_CSV_PATH);
