@@ -1,6 +1,7 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.jena.base.Sys;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
@@ -227,13 +228,22 @@ public class OntCreator {
             for (CSVRecord record : records) {
                 String aRollNumber = record.get(1);
                 String aLabel = record.get(2);
-                String aAddress = record.get(3) + ", " + record.get(4) + ", " + record.get(5) + ", " + record.get(6);
+                String aAddress = record.get(3);
+                if (!record.get(4).equals("")) {
+                    aAddress += ", " + record.get(4);
+                    if (!record.get(5).equals("")) {
+                        aAddress += ", " + record.get(5);
+                        if (!record.get(6).equals("")) {
+                            aAddress += ", " + record.get(6);
+                        }
+                    }
+                }
                 int aBoyCount = Integer.parseInt(record.get(12));
                 int aGirlCount = Integer.parseInt(record.get(13));
                 int aStudentCount = Integer.parseInt(record.get(14));
-                boolean aInIsland = record.get(9) == "N";
-                boolean aIsDeis = record.get(10) == "N";
-                boolean aIsGaeltacht = record.get(11) == "N";
+                boolean aInIsland = record.get(9).equals("Y");
+                boolean aIsDeis = record.get(10).equals("Y");
+                boolean aIsGaeltacht = record.get(11).equals("Y");
 
                 Individual aLocation = geoLocation.createIndividual();
                 aLocation.addLiteral(latitude, Float.parseFloat(record.get(18)));
@@ -243,9 +253,9 @@ public class OntCreator {
 
                 String ethosString = record.get(8);
                 Individual aEthosType;
-                if (ethosString == "CATHOLIC") {
+                if (ethosString.equals("CATHOLIC")) {
                     aEthosType = catholic.createIndividual();
-                } else if (ethosString == "CHURCH OF IRELAND") {
+                } else if (ethosString.equals("CHURCH OF IRELAND")) {
                     aEthosType = churchOfIreland.createIndividual();
                 } else {
                     aEthosType = multiDenominational.createIndividual();
@@ -262,7 +272,7 @@ public class OntCreator {
                     aSchool = mixedSchool.createIndividual(NAMESPACE + aRollNumber);
                 }
                 aSchool.addOntClass(school);
-                if (ethosString == "CATHOLIC") {
+                if (ethosString.equals("CATHOLIC")) {
                     aSchool.addOntClass(catholicSchool);
                 }
 
