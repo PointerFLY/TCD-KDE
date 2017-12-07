@@ -5,7 +5,9 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
@@ -41,18 +43,26 @@ public class OntCreator {
         /****************** County Class *******************/
 
         OntClass county = ontModel.createClass(NAMESPACE + "County");
+        county.addLabel("County", null);
+        county.addComment("Ireland Counties, can be distinguished by their names", null);
 
         // RDFS: label for name
 
         DatatypeProperty area = ontModel.createDatatypeProperty(NAMESPACE + "area");
+        area.addLabel("area", null);
+        area.addComment("Define area of a county", null);
         area.setDomain(county);
         area.setRange(XSD.xfloat);
 
         SymmetricProperty adjacentTo = ontModel.createSymmetricProperty(NAMESPACE + "adjacentTo");
+        adjacentTo.addLabel("adjacentTo", null);
+        adjacentTo.addComment("List other counties that is geographically touch with current county", null);
         adjacentTo.setDomain(county);
         adjacentTo.setRange(county);
 
         TransitiveProperty biggerThan = ontModel.createTransitiveProperty(NAMESPACE + "biggerThan");
+        biggerThan.addLabel("biggerThan", null);
+        biggerThan.addComment("List other counties that current county's area is bigger than", null);
         biggerThan.setDomain(county);
         biggerThan.setRange(county);
 
@@ -63,9 +73,17 @@ public class OntCreator {
         OntClass catholic = ontModel.createClass(NAMESPACE + "Catholic");
         OntClass churchOfIreland = ontModel.createClass(NAMESPACE + "ChurchOfIreland");
         OntClass multiDenominational = ontModel.createClass(NAMESPACE + "MultiDenominational");
+        catholic.addLabel("Catholic", null);
+        catholic.addComment("One of Ireland primary school ethos category", null);
+        churchOfIreland.addLabel("ChurchOfIreland", null);
+        churchOfIreland.addComment("One of Ireland primary school ethos category", null);
+        multiDenominational.addLabel("MultiDenominational", null);
+        multiDenominational.addComment("One of Ireland primary school ethos category", null);
 
         RDFList ethosList = ontModel.createList(new RDFNode[]{catholic, churchOfIreland, multiDenominational});
         OntClass ethos = ontModel.createEnumeratedClass(NAMESPACE + "Ethos", ethosList);
+        ethos.addLabel("ethos", null);
+        ethos.addComment("Ireland primary school ethos, must be one of Catholic, ChurchOfIreland and MultiDenominational", null);
 
         catholic.addSuperClass(ethos);
         churchOfIreland.addSuperClass(ethos);
@@ -76,6 +94,12 @@ public class OntCreator {
         OntClass boySchool = ontModel.createClass(NAMESPACE + "BoySchool");
         OntClass girlSchool = ontModel.createClass(NAMESPACE + "GirlSchool");
         OntClass mixedSchool = ontModel.createClass(NAMESPACE + "MixedSchool");
+        boySchool.addLabel("BoySchool", null);
+        boySchool.addComment("Boy school, with girl count == 0", null);
+        girlSchool.addLabel("GirlSchool", null);
+        girlSchool.addComment("Girl school, with boy count == 0", null);
+        mixedSchool.addLabel("MixedSchool", null);
+        mixedSchool.addComment("School with both girls and boys", null);
 
         RDFList list = ontModel.createList(new RDFNode[]{boySchool, girlSchool, mixedSchool});
         boySchool.addDisjointWith(girlSchool);
@@ -85,46 +109,68 @@ public class OntCreator {
         /***************** School Class *******************/
 
         OntClass school = ontModel.createUnionClass(NAMESPACE + "School", list);
+        school.addLabel("School", null);
+        school.addComment("Ireland primary school definition, contains information of schools", null);
 
         // RDFS:label for name
 
         DatatypeProperty address = ontModel.createDatatypeProperty(NAMESPACE + "address");
+        address.addLabel("address", null);
+        address.addComment("Address of School, described by a text", null);
         address.setDomain(school);
         address.setRange(XSD.xstring);
 
         DatatypeProperty boyCount = ontModel.createDatatypeProperty(NAMESPACE + "boyCount");
+        boyCount.addLabel("boyCount", null);
+        boyCount.addComment("Boy count of a school", null);
         boyCount.setDomain(school);
         boyCount.setRange(XSD.nonNegativeInteger);
 
         DatatypeProperty girlCount = ontModel.createDatatypeProperty(NAMESPACE + "girlCount");
+        girlCount.addLabel("girlCount", null);
+        girlCount.addComment("Girl count of a school", null);
         girlCount.setDomain(school);
         girlCount.setRange(XSD.nonNegativeInteger);
 
         DatatypeProperty studentCount = ontModel.createDatatypeProperty(NAMESPACE + "studentCount");
+        studentCount.addLabel("studentCount", null);
+        studentCount.addComment("Student count of a school", null);
         studentCount.setDomain(school);
         studentCount.setRange(XSD.positiveInteger);
 
         DatatypeProperty inIsland = ontModel.createDatatypeProperty(NAMESPACE + "inIsland");
+        inIsland.addLabel("inIsland", null);
+        inIsland.addComment("Whether a school is in Island or not", null);
         inIsland.setDomain(school);
         inIsland.setRange(XSD.xboolean);
 
         ObjectProperty location = ontModel.createObjectProperty(NAMESPACE + "location");
+        location.addLabel("location", null);
+        location.addComment("Geographic location of a school, described by a GeoLocation", null);
         location.setDomain(school);
         location.setRange(geoLocation);
 
         ObjectProperty inCounty = ontModel.createObjectProperty(NAMESPACE + "inCounty");
+        inCounty.addLabel("inCounty", null);
+        inCounty.addComment("Which ireland county the school belongs to", null);
         inCounty.setDomain(school);
         inCounty.setRange(county);
 
         DatatypeProperty isDEIS = ontModel.createDatatypeProperty(NAMESPACE + "isDEIS");
+        isDEIS.addLabel("isDEIS", null);
+        isDEIS.addComment("Whether the school is DEIS", null);
         isDEIS.setDomain(school);
         isDEIS.setRange(XSD.xboolean);
 
         DatatypeProperty isGaeltacht = ontModel.createDatatypeProperty(NAMESPACE + "isGaeltacht");
+        isGaeltacht.addLabel("isGaeltacht", null);
+        isGaeltacht.addLabel("Whether the school is Gaeltacht", null);
         isGaeltacht.setDomain(school);
         isGaeltacht.setRange(XSD.xboolean);
 
         DatatypeProperty withEthos = ontModel.createDatatypeProperty(NAMESPACE + "withEthos");
+        withEthos.addLabel("withEthos", null);
+        withEthos.addComment("Ethos type of the school", null);
         withEthos.setDomain(school);
         withEthos.setRange(ethos);
 
@@ -135,6 +181,8 @@ public class OntCreator {
         mixedSchool.addSuperClass(school);
 
         OntClass catholicSchool = ontModel.createClass(NAMESPACE + "CatholicSchool");
+        catholicSchool.addLabel("CatholicSchool", null);
+        catholicSchool.addComment("School class definition which ethos is Catholic", null);
         catholicSchool.addSuperClass(school);
         catholicSchool.addSuperClass(ontModel.createHasValueRestriction(null, withEthos, catholic));
 
@@ -145,6 +193,8 @@ public class OntCreator {
         // County property
 
         ObjectProperty hasSchools = ontModel.createObjectProperty(NAMESPACE + "hasSchools");
+        hasSchools.addLabel("hasSchools", null);
+        hasSchools.addComment("List schools belongs to the county", null);
         hasSchools.setDomain(county);
         hasSchools.setRange(school);
         hasSchools.addInverseOf(inCounty);
@@ -229,7 +279,7 @@ public class OntCreator {
         ArrayList<Individual> countyIndiList = new ArrayList<>();
         for (ArrayList<Object> info : countyInfoList) {
             Individual aCounty = county.createIndividual(NAMESPACE + info.get(0));
-            aCounty.addLabel((String)info.get(0), "");
+            aCounty.addLabel((String)info.get(0), null);
             aCounty.addLabel((String)info.get(1), "en");
             aCounty.addLabel((String)info.get(2), "ga");
             aCounty.addLiteral(area, (float)info.get(4));
