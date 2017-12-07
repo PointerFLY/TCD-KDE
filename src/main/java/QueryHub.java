@@ -16,7 +16,7 @@ public class QueryHub {
 
     QueryHub() {
         model = ModelFactory.createOntologyModel();
-        model.read(FileUtils.COUNTY_PATH);
+        model.read(FileUtils.ONTOLOGY_PATH);
 
         try {
             File dir = new File(ClassLoader.getSystemResources("sparqls").nextElement().getFile());
