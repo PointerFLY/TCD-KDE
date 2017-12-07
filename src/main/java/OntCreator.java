@@ -210,8 +210,10 @@ public class OntCreator {
             info.add(enLabel);
             info.add(gaLabel);
             info.add(geometry);
-            // TODO: AREA unit correctness
-            info.add((float)geometry.calculateArea2D());
+            // TODO: AREA unit correctness, add approximate scale for now. based on dublin
+            float scale = 7365.0f;
+            info.add((float)geometry.calculateArea2D() * scale);
+
             countyInfoList.add(info);
         }
 
@@ -341,8 +343,6 @@ public class OntCreator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
 
         /* ---------------------   Split Line  ---------------------------- */
         /************************** Persistence **********************/
