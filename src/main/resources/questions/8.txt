@@ -1,1 +1,1 @@
-List counties with highest female student density in descending order.
+List counties with female student density in descending order.
