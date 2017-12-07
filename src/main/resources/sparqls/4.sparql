@@ -4,11 +4,28 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX base: <http://www.cs7is1.com/ireland-school-county#>
 
-SELECT ?c (SUM(?s) AS ?boyCountInCounty) ?a
-WHERE {
- ?school base:inCounty ?c.
- ?school base:boyCount ?s.
- ?c base:area ?a
+SELECT (?count1 - ?count2 AS ?difference) (?count1 AS ?max) (?count2 AS ?min)
+WHERE{
+{
+    SELECT ?c1 (SUM(?b1) AS ?count1) ?area1
+    WHERE {
+        ?school base:inCounty ?c1.
+        ?school base:boyCount ?b1.
+        ?c1 base:area ?area1.
+    }
+    GROUP BY ?c1 ?area1
+    ORDER BY DESC(?area1)
+    LIMIT 1
 }
-GROUP BY ?c ?a
-ORDER BY DESC (?a)
+{
+   SELECT ?c2 (SUM(?b2) AS ?count2) ?area2
+    WHERE {
+        ?school base:inCounty ?c2.
+        ?school base:boyCount ?b2.
+        ?c2 base:area ?area2.
+    }
+    GROUP BY ?c2 ?area2
+    ORDER BY ?area2
+    LIMIT 1
+}
+}

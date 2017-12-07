@@ -5,9 +5,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
@@ -25,14 +23,37 @@ public class OntCreator {
         OntModel ontModel = ModelFactory.createOntologyModel();
         ontModel.setNsPrefix("base", NAMESPACE);
 
+        String dcns = "http://purl.org/dc/elements/1.1";
+        ontModel.setNsPrefix("dc", dcns);
+
+        Property dcTitle = ontModel.createProperty(dcns + "title");
+        Property dcCreator = ontModel.createProperty(dcns + "creator");
+        Property dcContributor = ontModel.createProperty(dcns + "contributor");
+        Property dcDescription = ontModel.createProperty(dcns + "description");
+
+        OntClass selfClass = ontModel.createClass(BASE_URI);
+        Individual self = selfClass.createIndividual();
+        self.addProperty(dcTitle, "ireland-school-county");
+        self.addLabel("ireland-school-county", null);
+        self.addProperty(RDFS.comment, "Ireland primary school information, with county information related to these schools");
+        self.addProperty(dcCreator, "Linghao Ma");
+        self.addProperty(dcContributor, "Linghao Ma, Ashish Lochan, Vinay Chandragiri");
+        self.addProperty(dcDescription, "Ireland primary school information, with county information related to these schools");
+
         // GeoLocation Class
 
         OntClass geoLocation = ontModel.createClass(NAMESPACE + "GeoLocation");
+        geoLocation.addLabel("GeoLocation", null);
+        geoLocation.addComment("Geographic location contains a latitude and a longitude", null);
 
         DatatypeProperty latitude = ontModel.createDatatypeProperty(NAMESPACE + "latitude");
         DatatypeProperty longitude = ontModel.createDatatypeProperty(NAMESPACE + "longitude");
+        latitude.addLabel("latitude", null);
+        latitude.addComment("Geographic latitude", null);
         latitude.setDomain(geoLocation);
         latitude.setRange(XSD.xfloat);
+        latitude.addLabel("longitude", null);
+        latitude.addComment("Geographic longitude", null);
         longitude.setDomain(geoLocation);
         longitude.setRange(XSD.xfloat);
 
@@ -95,9 +116,9 @@ public class OntCreator {
         OntClass girlSchool = ontModel.createClass(NAMESPACE + "GirlSchool");
         OntClass mixedSchool = ontModel.createClass(NAMESPACE + "MixedSchool");
         boySchool.addLabel("BoySchool", null);
-        boySchool.addComment("Boy school, with girl count == 0", null);
+        boySchool.addComment("Boy school, with girl count equals to 0", null);
         girlSchool.addLabel("GirlSchool", null);
-        girlSchool.addComment("Girl school, with boy count == 0", null);
+        girlSchool.addComment("Girl school, with boy count equals to 0", null);
         mixedSchool.addLabel("MixedSchool", null);
         mixedSchool.addComment("School with both girls and boys", null);
 
@@ -214,6 +235,7 @@ public class OntCreator {
         school.addSuperClass(ontModel.createCardinalityRestriction(null, isGaeltacht, 1));
 
 
+        writeToFile(ontModel);
 
 
         /* ---------------------   Split Line  ---------------------------- */
@@ -394,8 +416,6 @@ public class OntCreator {
             e.printStackTrace();
         }
 
-        /* ---------------------   Split Line  ---------------------------- */
-        /************************** Persistence **********************/
 
         writeToFile(ontModel);
     }

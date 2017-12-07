@@ -4,17 +4,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX base: <http://www.cs7is1.com/ireland-school-county#>
 
-SELECT ?c ?schlCnt ?a
+SELECT ?c ?count
 WHERE
 {
-SELECT ?c (COUNT(?school) AS ?schlCnt) ?a
-WHERE {
- ?school base:inCounty ?c.
- ?c base:area ?a
-}
-GROUP BY ?c ?a
-ORDER BY DESC (?a)
-LIMIT 2
+    SELECT ?c (COUNT(?school) AS ?count) ?a
+    WHERE {
+     ?school base:inCounty ?c.
+     ?c base:area ?a
+    }
+    GROUP BY ?c ?a
+    ORDER BY DESC (?a)
+    LIMIT 2
 }
 ORDER BY ?a
 LIMIT 1

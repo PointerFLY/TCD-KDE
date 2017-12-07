@@ -4,20 +4,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX base: <http://www.cs7is1.com/ireland-school-county#>
 
-SELECT ?c (?boyCnt / ?area AS ?density)
+
+SELECT ?c ((SUM(?s))/?a AS ?density)
 WHERE {
-{
-    SELECT ?area ?c
-    WHERE {
-        ?c base:area ?area.
-    }
+    ?school base:inCounty ?c.
+    ?school base:boyCount ?s.
+    ?c base:area ?a
 }
-{
-    SELECT (COUNT(?b) AS ?boyCnt)
-    WHERE {
-        ?school base:boyCount ?b.
-    }
-}
-}
-ORDER BY DESC(?density)
+GROUP BY ?c ?a
+ORDER BY DESC (?density)
 LIMIT 1
+
