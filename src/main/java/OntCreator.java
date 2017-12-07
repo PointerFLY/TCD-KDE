@@ -188,13 +188,13 @@ public class OntCreator {
             String enLabel = "";
 
             for (RDFNode label : labels) {
-                String labelText = label.toString();
-                if (labelText.contains("@ga")) {
-                    gaLabel = labelText;
-                } else if (labelText.contains("@en")) {
-                    enLabel = labelText;
+                Literal name = label.asLiteral();
+                if (name.getLanguage().equals("ga")) {
+                    gaLabel = name.getString();
+                } else if (name.getLanguage().equals("en")) {
+                    enLabel = name.getString();
                 } else {
-                    idLabel = labelText;
+                    idLabel = name.getString();
                 }
             }
 
@@ -220,16 +220,16 @@ public class OntCreator {
             public int compare(ArrayList<Object> o1, ArrayList<Object> o2) {
                 float area1 = (float)o1.get(4);
                 float area2 = (float)o2.get(4);
-                return Float.compare(area1, area2);
+                return Float.compare(area2, area1);
             }
         });
 
         ArrayList<Individual> countyIndiList = new ArrayList<>();
         for (ArrayList<Object> info : countyInfoList) {
             Individual aCounty = county.createIndividual(NAMESPACE + info.get(0));
-            aCounty.addLiteral(RDFS.label, info.get(0));
-            aCounty.addLiteral(RDFS.label, info.get(1));
-            aCounty.addLiteral(RDFS.label, info.get(2));
+            aCounty.addLabel((String)info.get(0), "");
+            aCounty.addLabel((String)info.get(1), "en");
+            aCounty.addLabel((String)info.get(2), "ga");
             aCounty.addLiteral(area, (float)info.get(4));
 
             countyIndiList.add(aCounty);
