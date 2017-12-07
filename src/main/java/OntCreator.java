@@ -1,5 +1,4 @@
 import com.esri.core.geometry.*;
-import com.github.jsonldjava.utils.Obj;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -22,6 +21,7 @@ public class OntCreator {
 
     public static void createOntology() {
         OntModel ontModel = ModelFactory.createOntologyModel();
+        ontModel.setNsPrefix("base", NAMESPACE);
 
         // GeoLocation Class
 
@@ -167,7 +167,7 @@ public class OntCreator {
 
 
         /* ---------------------   Split Line  ---------------------------- */
-        /********************** creator individuals *************************/
+        /********************** create individuals *************************/
 
         Model countyRDF = RDFDataMgr.loadModel(FileUtils.COUNTY_PATH);
 
@@ -220,7 +220,7 @@ public class OntCreator {
             public int compare(ArrayList<Object> o1, ArrayList<Object> o2) {
                 float area1 = (float)o1.get(4);
                 float area2 = (float)o2.get(4);
-                return area1 > area2 ? -1 : (area1 < area2) ? 1 : 0;
+                return Float.compare(area1, area2);
             }
         });
 
@@ -231,8 +231,6 @@ public class OntCreator {
             aCounty.addLiteral(RDFS.label, info.get(1));
             aCounty.addLiteral(RDFS.label, info.get(2));
             aCounty.addLiteral(area, (float)info.get(4));
-            // TODO: real hasSchool things
-//            aCounty.addProperty(hasSchools, school.createIndividual());
 
             countyIndiList.add(aCounty);
         }
