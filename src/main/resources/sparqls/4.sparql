@@ -1,4 +1,14 @@
-SELECT DISTINCT * WHERE {
-  ?s ?p ?o
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX base: <http://www.cs7is1.com/ireland-school-county#>
+
+SELECT ?c (SUM(?s) AS ?boyCountInCounty) ?a
+WHERE {
+ ?school base:inCounty ?c.
+ ?school base:boyCount ?s.
+ ?c base:area ?a
 }
-LIMIT 4
+GROUP BY ?c ?a
+ORDER BY DESC (?a)

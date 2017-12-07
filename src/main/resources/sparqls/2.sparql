@@ -15,7 +15,7 @@ WHERE {
 {
     SELECT (COUNT(?s) AS ?c)
     WHERE {
-        base:DUBLIN base:hasSchools ?s
+
     }
 }
 }
