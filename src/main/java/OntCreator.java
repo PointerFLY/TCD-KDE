@@ -6,8 +6,7 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
+import org.apache.jena.vocabulary.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -23,22 +22,22 @@ public class OntCreator {
         OntModel ontModel = ModelFactory.createOntologyModel();
         ontModel.setNsPrefix("base", NAMESPACE);
 
-        String dcns = "http://purl.org/dc/elements/1.1";
-        ontModel.setNsPrefix("dc", dcns);
-
-        Property dcTitle = ontModel.createProperty(dcns + "title");
-        Property dcCreator = ontModel.createProperty(dcns + "creator");
-        Property dcContributor = ontModel.createProperty(dcns + "contributor");
-        Property dcDescription = ontModel.createProperty(dcns + "description");
-
-        OntClass selfClass = ontModel.createClass(BASE_URI);
-        Individual self = selfClass.createIndividual();
-        self.addProperty(dcTitle, "ireland-school-county");
-        self.addLabel("ireland-school-county", null);
-        self.addProperty(RDFS.comment, "Ireland primary school information, with county information related to these schools");
-        self.addProperty(dcCreator, "Linghao Ma");
-        self.addProperty(dcContributor, "Linghao Ma, Ashish Lochan, Vinay Chandragiri");
-        self.addProperty(dcDescription, "Ireland primary school information, with county information related to these schools");
+        Ontology ontology = ontModel.createOntology(BASE_URI);
+        ontology.addLabel("ireland-school-county", null);
+        ontology.addComment("Ireland primary school information, with county information related to these schools", null);
+        ontology.addProperty(DCTerms.creator, "Linghao Ma");
+        ontology.addProperty(DCTerms.date, "05/12/2017");
+        ontology.addProperty(OWL2.versionInfo, "1.0.0");
+        ontology.addProperty(DCTerms.contributor, "Ashish Lochan");
+        ontology.addProperty(DCTerms.contributor, "Simon Quigley");
+        ontology.addProperty(DCTerms.contributor, "Vinay Chandragiri");
+        ontology.addProperty(DCTerms.contributor, "Abhimanyu M. Hazarika");
+        ontology.addProperty(DCTerms.contributor, "Dhruv Kabra");
+        ontology.addProperty(DCTerms.contributor, "Radhe Shyam Yadav");
+        Resource image = ontModel.createResource("https://drive.google.com/open?id=15B6U7PdfvPCvw7Kj8xIzpj4xdBl2-BL6");
+        ontology.addProperty(DCTerms.description, image);
+        String description = "Description: Ireland primary school information, with county information related to these schools";
+        ontology.addProperty(DCTerms.description, description);
 
         // GeoLocation Class
 
