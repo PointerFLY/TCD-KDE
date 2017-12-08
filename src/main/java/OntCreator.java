@@ -24,7 +24,12 @@ public class OntCreator {
 
         Ontology ontology = ontModel.createOntology(BASE_URI);
         ontology.addLabel("ireland-school-county", null);
-        ontology.addComment("Ireland primary school information, with county information related to these schools", null);
+        String comment = "Ireland primary school information, with county information related to these schools. " +
+                "Primary school has some properties, such as ethos, location, boyCount. Also it has a special" +
+                " property named inCounty, specifying which county it belongs to. " +
+                "County has basic properties such as area, adjacentTo, with hasSchools listing" +
+                " schools belongs to this county.";
+        ontology.addComment( comment, null);
         ontology.addProperty(DCTerms.creator, "Linghao Ma");
         ontology.addProperty(DCTerms.date, "05/12/2017");
         ontology.addProperty(OWL2.versionInfo, "1.0.0");
@@ -36,8 +41,7 @@ public class OntCreator {
         ontology.addProperty(DCTerms.contributor, "Radhe Shyam Yadav");
         Resource image = ontModel.createResource("https://drive.google.com/open?id=15B6U7PdfvPCvw7Kj8xIzpj4xdBl2-BL6");
         ontology.addProperty(DCTerms.description, image);
-        String description = "Description: Ireland primary school information, with county information related to these schools";
-        ontology.addProperty(DCTerms.description, description);
+        ontology.addProperty(DCTerms.description, comment);
 
         // GeoLocation Class
 

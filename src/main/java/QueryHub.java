@@ -38,9 +38,7 @@ public class QueryHub {
 
     public String executeQuery(int idx) {
         String questionTxt = queries[idx];
-        String resultTxt = queryWithTxt(questionTxt);
-
-        return resultTxt;
+        return queryWithTxt(questionTxt);
     }
 
     private String queryWithTxt(String queryString) {
