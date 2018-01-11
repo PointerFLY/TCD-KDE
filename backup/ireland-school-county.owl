@@ -1,0 +1,235 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix base:  <http://www.cs7is1.com/ireland-school-county#> .
+
+base:Catholic  a         owl:Class ;
+        rdfs:comment     "One of Ireland primary school ethos category" ;
+        rdfs:label       "Catholic" ;
+        rdfs:subClassOf  base:Ethos .
+
+base:hasSchools  a     owl:ObjectProperty ;
+        rdfs:comment   "List schools belongs to the county" ;
+        rdfs:domain    base:County ;
+        rdfs:label     "hasSchools" ;
+        rdfs:range     base:School ;
+        owl:inverseOf  base:inCounty .
+
+base:ChurchOfIreland  a  owl:Class ;
+        rdfs:comment     "One of Ireland primary school ethos category" ;
+        rdfs:label       "ChurchOfIreland" ;
+        rdfs:subClassOf  base:Ethos .
+
+base:MixedSchool  a       owl:Class ;
+        rdfs:comment      "School with both girls and boys" ;
+        rdfs:label        "MixedSchool" ;
+        rdfs:subClassOf   base:School ;
+        owl:disjointWith  base:GirlSchool , base:BoySchool .
+
+base:address  a       owl:DatatypeProperty ;
+        rdfs:comment  "Address of School, described by a text" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "address" ;
+        rdfs:range    xsd:string .
+
+base:latitude  a      owl:DatatypeProperty ;
+        rdfs:comment  "Geographic longitude" , "Geographic latitude" ;
+        rdfs:domain   base:GeoLocation ;
+        rdfs:label    "longitude" , "latitude" ;
+        rdfs:range    xsd:float .
+
+base:withEthos  a     owl:DatatypeProperty ;
+        rdfs:comment  "Ethos type of the school" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "withEthos" ;
+        rdfs:range    base:Ethos .
+
+base:MultiDenominational
+        a                owl:Class ;
+        rdfs:comment     "One of Ireland primary school ethos category" ;
+        rdfs:label       "MultiDenominational" ;
+        rdfs:subClassOf  base:Ethos .
+
+base:biggerThan  a    owl:TransitiveProperty ;
+        rdfs:comment  "List other counties that current county's area is bigger than" ;
+        rdfs:domain   base:County ;
+        rdfs:label    "biggerThan" ;
+        rdfs:range    base:County .
+
+<http://www.cs7is1.com/ireland-school-county>
+        a                owl:Ontology ;
+        rdfs:comment     "Ireland primary school information, with county information related to these schools. Primary school has some properties, such as ethos, location, boyCount. Also it has a special property named inCounty, specifying which county it belongs to. County has basic properties such as area, adjacentTo, with hasSchools listing schools belongs to this county." ;
+        rdfs:label       "ireland-school-county" ;
+        <http://purl.org/dc/terms/contributor>
+                "Abhimanyu M. Hazarika" , "Dhruv Kabra" , "Simon Quigley" , "Vinay Chandragiri" , "Ashish Lochan" , "Radhe Shyam Yadav" ;
+        <http://purl.org/dc/terms/creator>
+                "Linghao Ma" ;
+        <http://purl.org/dc/terms/date>
+                "05/12/2017" ;
+        <http://purl.org/dc/terms/description>
+                "Ireland primary school information, with county information related to these schools. Primary school has some properties, such as ethos, location, boyCount. Also it has a special property named inCounty, specifying which county it belongs to. County has basic properties such as area, adjacentTo, with hasSchools listing schools belongs to this county." ;
+        <http://purl.org/dc/terms/description>
+                <https://drive.google.com/open?id=15B6U7PdfvPCvw7Kj8xIzpj4xdBl2-BL6> ;
+        owl:versionInfo  "1.0.0" .
+
+base:adjacentTo  a    owl:SymmetricProperty ;
+        rdfs:comment  "List other counties that is geographically touch with current county" ;
+        rdfs:domain   base:County ;
+        rdfs:label    "adjacentTo" ;
+        rdfs:range    base:County .
+
+base:isDEIS  a        owl:DatatypeProperty ;
+        rdfs:comment  "Whether the school is DEIS" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "isDEIS" ;
+        rdfs:range    xsd:boolean .
+
+base:boyCount  a      owl:DatatypeProperty ;
+        rdfs:comment  "Boy count of a school" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "boyCount" ;
+        rdfs:range    xsd:nonNegativeInteger .
+
+base:BoySchool  a         owl:Class ;
+        rdfs:comment      "Boy school, with girl count equals to 0" ;
+        rdfs:label        "BoySchool" ;
+        rdfs:subClassOf   base:School ;
+        rdfs:subClassOf   [ a               owl:Restriction ;
+                            owl:hasValue    "0"^^xsd:int ;
+                            owl:onProperty  base:girlCount
+                          ] ;
+        owl:disjointWith  base:GirlSchool .
+
+base:studentCount  a  owl:DatatypeProperty ;
+        rdfs:comment  "Student count of a school" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "studentCount" ;
+        rdfs:range    xsd:positiveInteger .
+
+base:Ethos  a         owl:Class ;
+        rdfs:comment  "Ireland primary school ethos, must be one of Catholic, ChurchOfIreland and MultiDenominational" ;
+        rdfs:label    "ethos" ;
+        owl:oneOf     ( base:Catholic base:ChurchOfIreland base:MultiDenominational ) .
+
+base:longitude  a    owl:DatatypeProperty ;
+        rdfs:domain  base:GeoLocation ;
+        rdfs:range   xsd:float .
+
+base:GirlSchool  a       owl:Class ;
+        rdfs:comment     "Girl school, with boy count equals to 0" ;
+        rdfs:label       "GirlSchool" ;
+        rdfs:subClassOf  base:School ;
+        rdfs:subClassOf  [ a               owl:Restriction ;
+                           owl:hasValue    "0"^^xsd:int ;
+                           owl:onProperty  base:girlCount
+                         ] .
+
+base:location  a      owl:ObjectProperty ;
+        rdfs:comment  "Geographic location of a school, described by a GeoLocation" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "location" ;
+        rdfs:range    base:GeoLocation .
+
+base:inCounty  a      owl:ObjectProperty ;
+        rdfs:comment  "Which ireland county the school belongs to" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "inCounty" ;
+        rdfs:range    base:County .
+
+base:isGaeltacht  a  owl:DatatypeProperty ;
+        rdfs:domain  base:School ;
+        rdfs:label   "Whether the school is Gaeltacht" , "isGaeltacht" ;
+        rdfs:range   xsd:boolean .
+
+base:girlCount  a     owl:DatatypeProperty ;
+        rdfs:comment  "Girl count of a school" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "girlCount" ;
+        rdfs:range    xsd:nonNegativeInteger .
+
+base:area  a          owl:DatatypeProperty ;
+        rdfs:comment  "Define area of a county" ;
+        rdfs:domain   base:County ;
+        rdfs:label    "area" ;
+        rdfs:range    xsd:float .
+
+base:CatholicSchool  a   owl:Class ;
+        rdfs:comment     "School class definition which ethos is Catholic" ;
+        rdfs:label       "CatholicSchool" ;
+        rdfs:subClassOf  base:School ;
+        rdfs:subClassOf  [ a               owl:Restriction ;
+                           owl:hasValue    base:Catholic ;
+                           owl:onProperty  base:withEthos
+                         ] .
+
+base:inIsland  a      owl:DatatypeProperty ;
+        rdfs:comment  "Whether a school is in Island or not" ;
+        rdfs:domain   base:School ;
+        rdfs:label    "inIsland" ;
+        rdfs:range    xsd:boolean .
+
+base:County  a           owl:Class ;
+        rdfs:comment     "Ireland Counties, can be distinguished by their names" ;
+        rdfs:label       "County" ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:area
+                         ] .
+
+base:GeoLocation  a      owl:Class ;
+        rdfs:comment     "Geographic location contains a latitude and a longitude" ;
+        rdfs:label       "GeoLocation" ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:longitude
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:latitude
+                         ] .
+
+base:School  a           owl:Class ;
+        rdfs:comment     "Ireland primary school definition, contains information of schools" ;
+        rdfs:label       "School" ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:girlCount
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:studentCount
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:withEthos
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:isDEIS
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:location
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:boyCount
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:isGaeltacht
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:inCounty
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:address
+                         ] ;
+        rdfs:subClassOf  [ a                owl:Restriction ;
+                           owl:cardinality  "1"^^xsd:int ;
+                           owl:onProperty   base:inIsland
+                         ] ;
+        owl:unionOf      ( base:BoySchool base:GirlSchool base:MixedSchool ) .

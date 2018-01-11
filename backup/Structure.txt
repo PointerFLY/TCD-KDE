@@ -1,0 +1,44 @@
+Notes: 
+1. Terms with first letter capitalized are classes, lowercase terms are properties. For example, School is a Class, BoySchool is a class, address is a property. Ethoc, Catholic, ChurchOfIreland, MultiDenominational are special Classes, ruled by oneOf.
+2. ObjectProperties are explained with : xxx, other properties are literal (integer, string, etc).
+3. I will create instance only for School and County Classes, other classes are defined for creating ObjectProperties.
+4. In general, we have 11 Classes and 16 properties. (RDFS:label is not defined by us, so does not count)
+
+
+School: 
+RDFS:label
+address
+boyCount
+girCount
+studentCount
+inIsland
+location: GeoLocation
+inCounty: County
+isDEIS
+isGaeltacht
+withEthos: Ethos
+
+BoySchool
+GirlSchool
+MixedSchool
+CatholicSchool
+
+ 
+County:
+RDFS:label
+area
+adjacentTo
+biggerThan
+hasSchools: School List
+
+
+Ethos
+Catholic
+ChurchOfIreland
+MultiDenominational
+
+
+GeoLocation:
+latitude
+longitude
+
